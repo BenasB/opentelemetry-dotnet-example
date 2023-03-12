@@ -11,19 +11,18 @@ builder.Services.AddOpenTelemetry().WithTracing(builder =>
 {
     builder
         .AddConsoleExporter()
+        .AddOtlpExporter(options =>
+        {
+            options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
+        })
         .ConfigureResource(builder => builder.AddService(serviceName))
         .AddAspNetCoreInstrumentation();
 });
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.MapGet("/hello", () =>
 {

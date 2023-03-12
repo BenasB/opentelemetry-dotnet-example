@@ -16,6 +16,5 @@ RUN dotnet publish "Roomr.Reservations.csproj" -c Release -o /app/publish /p:Use
 
 FROM base AS final
 WORKDIR /app
-ENV ASPNETCORE_ENVIRONMENT=Production
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Roomr.Reservations.dll"]
