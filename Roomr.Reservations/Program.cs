@@ -24,8 +24,10 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapGet("/hello", () =>
+app.MapGet("/hello", async () =>
 {
+    var client = new HttpClient();
+    var token = await client.GetAsync("http://localhost:5232/login");
     return Results.Ok();
 });
 
