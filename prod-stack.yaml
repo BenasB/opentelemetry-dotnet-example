@@ -1,6 +1,6 @@
 ﻿services:
   reservations:
-    image: roomrreservations
+    image: benasbudrys/roomr-reservations
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
       - ASPNETCORE_AuthUrl=http://auth:80
@@ -10,7 +10,7 @@
       - jaeger
 
   auth:
-    image: roomrreservations
+    image: benasbudrys/roomr-auth
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
     depends_on:
