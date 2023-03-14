@@ -19,15 +19,22 @@ builder.Services.AddOpenTelemetry().WithTracing(builder =>
         .AddAspNetCoreInstrumentation();
 });
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddInMemoryCollection(new Dictionary<string, string>{
+        {"AuthUrl", "http://localhost:5232"}
+    });
+}
+
 var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapGet("/hello", async () =>
+app.MapGet("/hello", async (IConfiguration configuration) =>
 {
     var client = new HttpClient();
-    var token = await client.GetAsync("http://localhost:5232/login");
+    var token = await client.GetAsync($"{configuration.GetValue<string>("AuthUrl")}/login");
     return Results.Ok();
 });
 

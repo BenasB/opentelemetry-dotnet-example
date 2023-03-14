@@ -3,8 +3,16 @@
     image: roomrreservations
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
+      - ASPNETCORE_AuthUrl=http://auth:80
     ports:
-      - 80:80
+      - 8000:80
+    depends_on:
+      - jaeger
+
+  auth:
+    image: roomrreservations
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
     depends_on:
       - jaeger
 
@@ -14,4 +22,4 @@
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     ports:
-      - 16686:16686
+      - 8001:16686
