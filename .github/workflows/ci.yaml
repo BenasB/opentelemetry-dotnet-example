@@ -30,6 +30,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ./${{ matrix.project.path }}/
+          file: ./${{ matrix.project.path }}/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.project.name }}:latest
