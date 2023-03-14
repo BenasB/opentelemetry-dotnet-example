@@ -35,7 +35,7 @@ app.MapGet("/hello", async (IConfiguration configuration) =>
 {
     var client = new HttpClient();
     var token = await client.GetAsync($"{configuration.GetValue<string>("AuthUrl")}/login");
-    return Results.Ok();
+    return Results.Ok(token);
 });
 
 app.Run();
