@@ -4,18 +4,20 @@
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
       - ASPNETCORE_AuthUrl=http://auth:80
-      - ASPNETCORE_ConnectionStrings_UsersDatabase="server=db;uid=root;pwd=example;database=users"
     ports:
       - 8000:80
     depends_on:
       - jaeger
+      - auth
 
   auth:
     image: benasbudrys/roomr-auth
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
+      - ASPNETCORE_ConnectionStrings__UsersDatabase=server=db;uid=root;pwd=example;database=users
     depends_on:
       - jaeger
+      - db
 
   jaeger:
     image: jaegertracing/all-in-one:latest

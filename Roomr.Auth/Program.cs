@@ -23,6 +23,7 @@ builder.Services.AddOpenTelemetry().WithTracing(builder =>
 });
 
 var usersDatabaseConnectionString = builder.Configuration.GetConnectionString("UsersDatabase");
+Console.WriteLine($"Trying to use database connection string: '{usersDatabaseConnectionString}'");
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseMySql(usersDatabaseConnectionString, ServerVersion.AutoDetect(usersDatabaseConnectionString))
 );
