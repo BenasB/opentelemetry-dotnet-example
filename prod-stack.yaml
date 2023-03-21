@@ -3,7 +3,7 @@
     image: benasbudrys/roomr-reservations
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
-      - ASPNETCORE_AuthUrl=http://auth:80
+      - AuthUrl=http://auth:80
     ports:
       - 8000:80
     depends_on:
@@ -14,10 +14,12 @@
     image: benasbudrys/roomr-auth
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
-      - ASPNETCORE_ConnectionStrings__UsersDatabase=server=db;uid=root;pwd=example;database=users
+      - ConnectionStrings__UsersDatabase=server=db;uid=root;pwd=example;database=users
     depends_on:
-      - jaeger
-      - db
+      jaeger:
+        condition: service_started
+      db:
+        condition: service_healthy
 
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -32,3 +34,7 @@
     restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=example
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
