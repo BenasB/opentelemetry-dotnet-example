@@ -1,0 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+namespace Roomr.Auth;
+
+internal class User
+{
+    [Key]
+    [Required]
+    public string Username { get; set; } = null!;
+
+    [Required]
+    public string Password { get; set; } = null!;
+}

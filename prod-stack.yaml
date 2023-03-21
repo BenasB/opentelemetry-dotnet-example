@@ -4,6 +4,7 @@
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
       - ASPNETCORE_AuthUrl=http://auth:80
+      - ASPNETCORE_ConnectionStrings_UsersDatabase="server=db;uid=root;pwd=example;database=users"
     ports:
       - 8000:80
     depends_on:
@@ -23,3 +24,9 @@
       - COLLECTOR_OTLP_ENABLED=true
     ports:
       - 8001:16686
+
+  db:
+    image: mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=example
