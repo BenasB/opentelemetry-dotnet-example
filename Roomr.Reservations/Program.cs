@@ -1,5 +1,8 @@
+using System.Diagnostics;
+using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Roomr.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,14 +29,29 @@ app.UseSwaggerUI();
 
 app.MapGet("/hello", async (IConfiguration configuration) =>
 {
+    Baggage.Current.SetBaggage("hello", "world");
     var authUrl = configuration.GetValue<string>("AuthUrl");
     var client = new HttpClient()
     {
         BaseAddress = new Uri(authUrl)
     };
-    await client.PostAsync($"register?username=res&password=lol", null);
-    var token = await client.GetAsync($"login");
-    return Results.Ok(token);
+
+    var newUser = new User
+    {
+        Username = Guid.NewGuid().ToString(),
+        Password = Guid.NewGuid().ToString()
+    };
+
+    await client.PostAsJsonAsync($"register", newUser);
+    var response = await client.PostAsJsonAsync($"login", newUser);
+    var user = await response.Content.ReadFromJsonAsync<User>();
+
+    if (user is null)
+        return Results.Problem("Failed to register or log in");
+
+    Activity.Current?.SetTag("auth.username", user.Username);
+
+    return Results.Ok(user);
 });
 
 app.Run();

@@ -1,4 +1,7 @@
+using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Roomr.Auth;
@@ -19,7 +22,14 @@ builder.Services.AddOpenTelemetry().WithTracing(builder =>
         })
         .ConfigureResource(builder => builder.AddService(serviceName))
         .AddAspNetCoreInstrumentation()
-        .AddEntityFrameworkCoreInstrumentation();
+        .AddEntityFrameworkCoreInstrumentation(options =>
+            options.EnrichWithIDbCommand = (activity, command) =>
+            {
+                var databaseName = command.Connection?.Database ?? "Unknown db";
+                activity.DisplayName = databaseName;
+                activity.SetTag("db.name", databaseName);
+            }
+        );
 });
 
 var usersDatabaseConnectionString = builder.Configuration.GetConnectionString("UsersDatabase");
@@ -47,23 +57,25 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapGet("/login", () =>
+app.MapPost("/login", async ([FromBody] User user, AuthDbContext dbContext) =>
 {
-    return Results.Ok("token");
+    var existingUser = await dbContext.Users.FindAsync(user.Username);
+
+    if (existingUser is null)
+        return Results.NotFound("Specified user does not exist");
+
+    if (existingUser.Password != user.Password)
+        return Results.BadRequest("Password does not match");
+
+    return Results.Ok(existingUser);
 });
 
-app.MapPost("/register", async (string username, string password, AuthDbContext dbContext) =>
+app.MapPost("/register", async ([FromBody] User newUser, AuthDbContext dbContext) =>
 {
-    var newUser = new User
-    {
-        Username = username,
-        Password = password
-    };
-
     var existingUser = await dbContext.Users.FindAsync(newUser.Username);
 
     if (existingUser is not null)
-        return Results.BadRequest();
+        return Results.BadRequest("Specified user already exists");
 
     var a = await dbContext.Users.AddAsync(newUser);
     await dbContext.SaveChangesAsync();

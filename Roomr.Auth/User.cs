@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 namespace Roomr.Auth;
 
-internal class User
+public class User
 {
     [Key]
     [Required]
